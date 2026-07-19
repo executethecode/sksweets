@@ -54,7 +54,7 @@ export default function OrderModal({ open, onClose }) {
     setTimeout(() => onClose(), 200);
   }
 
-  function submit() {
+  async function submit() {
     if (!name || !phone || !address) {
       alert("Please enter name, mobile number and delivery address");
       return;
@@ -76,10 +76,38 @@ export default function OrderModal({ open, onClose }) {
     const waApi = `https://api.whatsapp.com/send?phone=917761856854&text=${payload}`;
     // fallback to wa.me if needed
     const waShort = `https://wa.me/917761856854?text=${payload}`;
+
+    // Log URL for diagnostics
+    console.log("WhatsApp URL:", waApi);
+
+    // Try opening a new tab; detect if popup is blocked (window.open returns null)
+    let newWin = null;
     try {
-      window.open(waApi, "_blank");
+      newWin = window.open(waApi, "_blank");
     } catch (e) {
-      window.open(waShort, "_blank");
+      console.warn("window.open threw:", e);
+    }
+
+    if (!newWin) {
+      // Popup blocked or failed — attempt clipboard copy then navigate in same tab
+      try {
+        await navigator.clipboard.writeText(message);
+        alert("Popup blocked. The order message was copied to your clipboard. Opening WhatsApp in this tab...");
+      } catch (err) {
+        // Clipboard not available; fall back to direct navigation
+        console.warn("Clipboard write failed:", err);
+      }
+      // Try navigating in same tab
+      try {
+        window.location.href = waApi;
+      } catch (e) {
+        // final fallback: open wa.me
+        try {
+          window.location.href = waShort;
+        } catch (ee) {
+          console.error("All navigation attempts failed:", ee);
+        }
+      }
     }
     handleClose();
   }
