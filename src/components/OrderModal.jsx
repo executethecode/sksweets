@@ -12,6 +12,7 @@ const sweetsOptions = [
 export default function OrderModal({ open, onClose }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [items, setItems] = useState(() =>
     sweetsOptions.map((s) => ({ name: s, qty: "", selected: false })),
   );
@@ -54,8 +55,8 @@ export default function OrderModal({ open, onClose }) {
   }
 
   function submit() {
-    if (!name || !phone) {
-      alert("Please enter name and mobile number");
+    if (!name || !phone || !address) {
+      alert("Please enter name, mobile number and delivery address");
       return;
     }
     const selected = items.filter((i) => i.selected);
@@ -64,11 +65,22 @@ export default function OrderModal({ open, onClose }) {
       return;
     }
 
-    const payload = encodeURIComponent(
-      `Name: ${name}\nMobile: ${phone}\nItems:\n${selected.map((it) => `- ${it.name}: ${it.qty || "1"}`).join("\n")}`,
-    );
-    const wa = `https://wa.me/917761856854?text=${payload}`;
-    window.open(wa, "_blank");
+    const itemsText = selected
+      .map((it) => `- ${it.name}: ${it.qty || "1"}`)
+      .join("\n");
+
+    const message = `New order from SK Sweets website\n\nName: ${name}\nMobile: ${phone}\nItems:\n${itemsText}\n\nDelivery address: ${address}\n\nThank you!`;
+
+    const payload = encodeURIComponent(message);
+    // Use api.whatsapp.com/send which is broadly compatible
+    const waApi = `https://api.whatsapp.com/send?phone=917761856854&text=${payload}`;
+    // fallback to wa.me if needed
+    const waShort = `https://wa.me/917761856854?text=${payload}`;
+    try {
+      window.open(waApi, "_blank");
+    } catch (e) {
+      window.open(waShort, "_blank");
+    }
     handleClose();
   }
 
@@ -105,6 +117,14 @@ export default function OrderModal({ open, onClose }) {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="Mobile number"
+            className="border p-2 rounded w-full"
+          />
+          <input
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Delivery address (required)"
+            required
+            aria-required="true"
             className="border p-2 rounded w-full"
           />
 
