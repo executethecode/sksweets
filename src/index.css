@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-cream font-sans;
+  color: #7f1d1d; /* deep red */
+}
+
+.hero-overlay {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.15));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.vibrant-accent {
+  background: linear-gradient(90deg, #ff7a59, #ffb347);
+}
